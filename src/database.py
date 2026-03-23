@@ -66,7 +66,12 @@ class SongDatabase:
             The assigned song_id (int)
         """
         # TODO: Implement index_song
-        raise NotImplementedError("Implement index_song()")
+        self.index_song_stats = {
+            "filepath": filepath,
+            "song_name": song_name,
+            "song_id": None,  # replace with assigned song_id
+            "num_fingerprints": None  # replace with actual count
+        }
 
     def index_directory(self, directory):
         """
@@ -82,7 +87,11 @@ class SongDatabase:
             directory: Path to a directory containing .wav files
         """
         # TODO: Implement index_directory
-        raise NotImplementedError("Implement index_directory()")
+        self.index_directory_stats = {
+            "directory": directory,
+            "num_songs_indexed": None,  # replace with actual count
+            "song_ids": []  # replace with list of assigned song_ids
+        }
 
     # ------------------------------------------------------------------ #
     # Serialization — YOU IMPLEMENT THESE
@@ -120,7 +129,12 @@ class SongDatabase:
             filepath: Where to save the JSON file (e.g., "data/database.json")
         """
         # TODO: Implement save
-        raise NotImplementedError("Implement save()")
+        implement_save_stats = {
+            "filepath": filepath,
+            "num_songs": None,  # replace with actual count
+            "num_entries": None  # replace with actual count
+        }
+        print("save stats:", implement_save_stats)
 
     @classmethod
     def load(cls, filepath):
@@ -148,4 +162,9 @@ class SongDatabase:
             A new SongDatabase instance with all data restored
         """
         # TODO: Implement load
-        raise NotImplementedError("Implement load()")
+        load_stats = {
+            "filepath": filepath,
+            "num_songs": None,  # replace with actual count
+            "num_entries": None  # replace with actual count
+        }
+        print("load stats:", load_stats)
