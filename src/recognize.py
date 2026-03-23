@@ -22,15 +22,15 @@ def recognize(audio, sample_rate, database):
       1. Fingerprint the audio clip to get a list of (hash_value, t_clip)
       2. If no fingerprints, return (None, 0, {})
       3. For each fingerprint (hash_val, t_clip):
-           - Look up hash_val in database.table to get all hits
-           - Each hit is (song_id, t_song)
-           - Compute delta = t_song - t_clip
-           - Group deltas by song_id:
-               matches[song_id].append(delta)
+        - Look up hash_val in database.table to get all hits
+        - Each hit is (song_id, t_song)
+        - Compute delta = t_song - t_clip
+        - Group deltas by song_id:
+        matches[song_id].append(delta)
       4. If no matches, return (None, 0, {})
       5. For each song_id in matches:
-           - Build an offset histogram: count how many times each delta appears
-             (use a plain dict: {delta: count})
+        - Build an offset histogram: count how many times each delta appears
+            (use a plain dict: {delta: count})
            - The peak count = max value in the histogram
            - Store: all_scores[song_name] = peak_count
            - Track the best song (highest peak_count)
@@ -83,8 +83,47 @@ def recognize(audio, sample_rate, database):
     #
     # Step 4: Return results
 
-    raise NotImplementedError("Implement recognize()")
+    fingerprints = fingerprint_audio(audio, sample_rate)
 
+    if not fingerprints:
+        return None, 0, {}
+
+    # Step 2: Collect matches
+    matches = {}  # song_id -> list of deltas
+
+    for hash_val, t_clip in fingerprints:
+        hits = database.table.lookup(hash_val)
+
+        for song_id, t_song in hits:
+            delta = t_song - t_clip
+            matches.setdefault(song_id, []).append(delta)
+
+    if not matches:
+        return None, 0, {}
+
+    # Step 3: Histogram + scoring
+    best_song_id = None
+    best_count = 0
+    all_scores = {}
+
+    for song_id, deltas in matches.items():
+        histogram = {}
+
+        for d in deltas:
+            histogram[d] = histogram.get(d, 0) + 1
+
+        peak_count = max(histogram.values())
+        song_name = database.get_song_name(song_id)
+
+        all_scores[song_name] = peak_count
+
+        if peak_count > best_count:
+            best_count = peak_count
+            best_song_id = song_id
+
+    best_song_name = database.get_song_name(best_song_id)
+
+    return best_song_name, best_count, all_scores
 
 def record_and_recognize(database, duration=5, sample_rate=SAMPLE_RATE):
     """
